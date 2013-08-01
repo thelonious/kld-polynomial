@@ -1,6 +1,6 @@
 {
   "name": "kld-polynomial",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A class of simple polynomial functionality including root finding",
   "author": {
     "name": "Kevin Lindsey",
@@ -16,11 +16,12 @@
     "test": "expresso"
   },
   "keywords": [
-    "affine",
-    "point",
-    "vector"
+    "polynomial",
+    "roots",
+    "derivative"
   ],
   "devDependencies": {
+    "expresso": "0.9.2"
   },
   "engines": {
     "node": ">= 0.10.4"
