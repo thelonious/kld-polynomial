@@ -1,7 +1,11 @@
-var SqrtPolynomial = require('../lib/SqrtPolynomial');
+var assert = require('assert'),
+    SqrtPolynomial = require('../index').SqrtPolynomial;
 
-exports.newPolynomial = function(beforeExit, assert) {
-    var poly = new SqrtPolynomial(2, 1, 0);
 
-    assert.equal("sqrt(2t^2 + t)", poly.toString());
-};
+describe('SqrtPolynomial', () => {
+    it("toString", () => {
+        var poly = new SqrtPolynomial(2, 1, 0);
+
+        assert.equal(poly.toString(), "sqrt(2t^2 + t)");
+    })
+});
