@@ -12,13 +12,16 @@
       "email": "quazistax@gmail.com"
     }
   ],
-  "license": "BSD",
+  "license": "BSD-3-Clause",
+  "bugs": "https://github.com/thelonious/kld-polynomial/issues",
+  "homepage": "https://github.com/thelonious/kld-polynomial",
   "repository": {
     "type": "git",
     "url": "git://github.com/thelonious/kld-polynomial.git"
   },
   "main": "index.js",
   "scripts": {
+    "eslint": "eslint .",
     "test": "mocha"
   },
   "keywords": [
@@ -27,9 +30,9 @@
     "derivative"
   ],
   "devDependencies": {
-    "mocha": "^3.4.2"
+    "mocha": "^6.1.4"
   },
   "engines": {
-    "node": ">= 0.10.4"
+    "node": ">= 10.15.3"
   }
 }
