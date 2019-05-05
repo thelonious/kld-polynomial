@@ -1,6 +1,4 @@
-"use strict";
-
 // expose classes
 
-exports.Polynomial = require("./lib/Polynomial");
-exports.SqrtPolynomial = require("./lib/SqrtPolynomial");
+export {default as Polynomial} from "./lib/Polynomial.js";
+export {default as SqrtPolynomial} from "./lib/SqrtPolynomial.js";
