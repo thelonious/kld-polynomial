@@ -1,3 +1,5 @@
+"use strict";
+
 // expose classes
 
 exports.Polynomial = require("./lib/Polynomial");

@@ -1,11 +1,12 @@
-var assert = require("assert"),
-    SqrtPolynomial = require("../index").SqrtPolynomial;
+"use strict";
 
+const assert = require("assert");
+const {SqrtPolynomial} = require("../index");
 
 describe("SqrtPolynomial", () => {
     it("toString", () => {
-        var poly = new SqrtPolynomial(2, 1, 0);
+        const poly = new SqrtPolynomial(2, 1, 0);
 
-        assert.equal(poly.toString(), "sqrt(2t^2 + t)");
+        assert.strictEqual(poly.toString(), "sqrt(2t^2 + t)");
     });
 });
