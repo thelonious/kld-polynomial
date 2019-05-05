@@ -79,6 +79,8 @@ module.exports = {
         "import/unambiguous": 0,
         "global-require": 0,
         "import/no-commonjs": 0,
-        "consistent-this": "off"
+        "consistent-this": "off",
+        "no-bitwise": "off",
+        "unicorn/prefer-exponentiation-operator": "off"
     }
 };
