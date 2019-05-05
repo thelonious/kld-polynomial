@@ -21,6 +21,9 @@
     "url": "git://github.com/thelonious/kld-polynomial.git"
   },
   "main": "index.js",
+  "browserslist": [
+    "cover 100%"
+  ],
   "scripts": {
     "eslint": "eslint .",
     "test": "npm run eslint && mocha",
@@ -33,6 +36,7 @@
     "roots",
     "derivative"
   ],
+  "dependencies": {},
   "devDependencies": {
     "@mysticatea/eslint-plugin": "^10.0.3",
     "eslint": "^5.16.0",

@@ -1,14 +1,15 @@
-kld-polynomial
-==============
+# kld-polynomial
 
 A class of simple polynomial functionality including root finding
 
-Install
--------
-    npm install kld-polynomial
+## Install
 
-Polynomial
-----------
+```
+npm install kld-polynomial
+```
+
+## Polynomial
+
 - Polynomial.interpolate
 - eval
 - add
@@ -29,8 +30,7 @@ Polynomial
 - getCubicRoots
 - getQuarticRoots
 
-SqrtPolynomial
---------------
+## SqrtPolynomial
+
  - inherits from Polynomial
  - eval returns square root of Polynomial.prototype.eval
- 
