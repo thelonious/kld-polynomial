@@ -107,6 +107,7 @@
 
   /**
    *  Polynomial.js
+   *
    *  @module Polynomial
    *  @copyright 2002-2019 Kevin Lindsey<br>
    *  -<br>
