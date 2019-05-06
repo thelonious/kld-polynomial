@@ -1,7 +1,5 @@
-"use strict";
-
-const assert = require("assert");
-const {SqrtPolynomial} = require("../index");
+import assert from "assert";
+import {SqrtPolynomial} from "../index.js";
 
 describe("SqrtPolynomial", () => {
     it("toString", () => {
