@@ -192,7 +192,7 @@
       key: "eval",
       value: function _eval(x) {
         if (isNaN(x)) {
-          throw new Error("Polynomial.eval: parameter must be a number");
+          throw new Error("Polynomial.eval: parameter must be a number, got '".concat(x, "'"));
         }
 
         var result = 0;
@@ -597,12 +597,14 @@
          */
 
         function push(value) {
-          if (value !== null) {
+          if (typeof value === "number") {
             roots.push(value);
           }
         }
 
-        if (this.getDegree() === 1) {
+        if (this.getDegree() === 0) {
+          throw new Error("Polynomial.getRootsInInterval: Unexpected empty polynomial");
+        } else if (this.getDegree() === 1) {
           push(this.bisection(min, max));
         } else {
           // get roots of derivative
