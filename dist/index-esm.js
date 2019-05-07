@@ -149,8 +149,6 @@ function () {
     this._s = 0;
   }
   /**
-   *  interpolate
-   *
    *  Based on poloint in "Numerical Recipes in C, 2nd Edition", pages 109-110
    *
    *  @param {Array<number>} xs
@@ -265,10 +263,8 @@ function () {
 
   }, {
     key: "simplify",
-    value: function simplify(TOLERANCE) {
-      if (TOLERANCE === undefined) {
-        TOLERANCE = 1e-12;
-      }
+    value: function simplify() {
+      var TOLERANCE = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1e-12;
 
       for (var i = this.getDegree(); i >= 0; i--) {
         if (Math.abs(this.coefs[i]) <= TOLERANCE) {
@@ -283,7 +279,6 @@ function () {
      *
      *  @param {number} min
      *  @param {number} max
-     *
      *  @returns {number}
      */
 
@@ -369,8 +364,6 @@ function () {
       return result;
     }
     /**
-     *  trapezoid
-     *
      *  Based on trapzd in "Numerical Recipes in C, 2nd Edition", page 137
      *
      *  @param {number} min
@@ -413,8 +406,6 @@ function () {
       return this._s;
     }
     /**
-     *  simpson
-     *
      *  Based on trapzd in "Numerical Recipes in C, 2nd Edition", page 139
      *
      *  @param {number} min
@@ -1043,6 +1034,7 @@ function () {
      *  Calculates absolute upper roots bound. <br/>
      *  All (Complex and Real) roots magnitudes are &lt;= result. Determined by Rouche method.
      *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
+     *
      *  @returns {number}
      */
 
@@ -1065,6 +1057,7 @@ function () {
      *  Calculates absolute lower roots bound. <br/>
      *  All (Complex and Real) roots magnitudes are &gt;= result. Determined by Rouche method.
      *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
+     *
      *  @returns {number}
      */
 
@@ -1083,10 +1076,11 @@ function () {
       return Math.abs(a[0]) / (Math.abs(a[0]) + max);
     }
     /**
-     *  Calculates left and right Real roots bounds. <br/>
+     *  Calculates left and right Real roots bounds.<br/>
      *  WORKS ONLY if all polynomial roots are Real.
      *  Real roots are in interval [minX, maxX]. Determined by Laguerre method.
      *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
+     *
      *  @returns {{ minX: number, maxX: number }}
      */
 
@@ -1112,6 +1106,7 @@ function () {
      *  Root count by Descartes rule of signs. <br/>
      *  Returns maximum number of positive and negative real roots and minimum number of complex roots.
      *  @see {@link http://en.wikipedia.org/wiki/Descartes%27_rule_of_signs}
+     *
      *  @returns {{maxRealPos: number, maxRealNeg: number, minComplex: number}}
      */
 
