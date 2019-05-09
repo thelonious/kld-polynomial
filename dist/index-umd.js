@@ -1339,6 +1339,7 @@
   /**
    *  SqrtPolynomial
    *
+   *  @deprecated
    *  @memberof module:kld-polynomial
    */
 
