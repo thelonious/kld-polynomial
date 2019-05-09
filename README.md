@@ -1,12 +1,52 @@
 # kld-polynomial
 
+- [Installation](#installation)
+- [Importing](#importing)
+- [API](#api)
+- [Links and Related Projects](#links-and-related-projects)
+
+---
+
 A class of simple polynomial functionality including root finding
 
-## Install
+# Installation
 
 ```
 npm install kld-polynomial
 ```
+
+# Importing
+
+The following sections indicate how you can import the code for use in various environments.
+
+## Node
+
+```javascript
+import {Polynomial} = require("kld-polynomial");
+```
+
+## ESM in Modern Browsers
+
+```javascript
+import {Polynomial} from './node_modules/kld-polynomial/dist/index-esm.js';
+```
+
+## Older Browsers
+
+```html
+<script src="./node_modules/kld-polynomial/dist/index-umd.js"></script>
+<script>
+  var Polynomial = KldPolynomial.Polynomial;
+</script>
+```
+
+## Bundlers
+
+```javascript
+import {Polynomial} from "kld-polynomial";
+```
+
+# API
 
 ## Polynomial
 
@@ -15,7 +55,7 @@ npm install kld-polynomial
 - add
 - multiply
 - divide_scalar
-- simplify
+- simplifyEquals
 - bisection
 - toString
 - trapezoid
@@ -30,7 +70,7 @@ npm install kld-polynomial
 - getCubicRoots
 - getQuarticRoots
 
-## SqrtPolynomial
+# Links and Related Projects
 
- - inherits from Polynomial
- - eval returns square root of Polynomial.prototype.eval
+- [kld-intersections](https://github.com/thelonious/kld-intersections)
+- [kld-contours](https://github.com/thelonious/kld-contours)
