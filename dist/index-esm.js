@@ -97,7 +97,7 @@ function _get(target, property, receiver) {
   return _get(target, property, receiver || target);
 }
 
-/* eslint-disable camelcase, unicorn/prefer-type-error */
+/* eslint-disable camelcase */
 
 /**
  *  Polynomial.js
@@ -106,7 +106,7 @@ function _get(target, property, receiver) {
  *  @copyright 2002-2019 Kevin Lindsey<br>
  *  -<br>
  *  Contribution {@link http://github.com/Quazistax/kld-polynomial}<br>
- *  2015 Robert Benko (Quazistax) <quazistax@gmail.com><br>
+ *  copyright 2015 Robert Benko (Quazistax) <quazistax@gmail.com><br>
  *  MIT license
  */
 
@@ -149,7 +149,7 @@ function () {
     this._s = 0;
   }
   /**
-   *  Based on poloint in "Numerical Recipes in C, 2nd Edition", pages 109-110
+   *  Based on polint in "Numerical Recipes in C, 2nd Edition", pages 109-110
    *
    *  @param {Array<number>} xs
    *  @param {Array<number>} ys
@@ -184,7 +184,7 @@ function () {
     key: "eval",
     value: function _eval(x) {
       if (isNaN(x)) {
-        throw new Error("Polynomial.eval: parameter must be a number, got '".concat(x, "'"));
+        throw new TypeError("Parameter must be a number. Found '".concat(x, "'"));
       }
 
       var result = 0;
@@ -243,27 +243,29 @@ function () {
       return result;
     }
     /**
-     *  divide_scalar
+     *  divideEqualsScalar
      *
+     *  @deprecated To be replaced by divideScalar
      *  @param {number} scalar
      */
 
   }, {
-    key: "divide_scalar",
-    value: function divide_scalar(scalar) {
+    key: "divideEqualsScalar",
+    value: function divideEqualsScalar(scalar) {
       for (var i = 0; i < this.coefs.length; i++) {
         this.coefs[i] /= scalar;
       }
     }
     /**
-     *  simplify
+     *  simplifyEquals
      *
+     *  @deprecated To be replaced by simplify
      *  @param {number} TOLERANCE
      */
 
   }, {
-    key: "simplify",
-    value: function simplify() {
+    key: "simplifyEquals",
+    value: function simplifyEquals() {
       var TOLERANCE = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1e-12;
 
       for (var i = this.getDegree(); i >= 0; i--) {
@@ -275,48 +277,47 @@ function () {
       }
     }
     /**
-     *  bisection
+     *  Sets small coefficients to zero.
      *
-     *  @param {number} min
-     *  @param {number} max
-     *  @returns {number}
+     *  @deprecated To be replaced by removeZeros
+     *  @param {number} TOLERANCE
+     *  @returns {module:kld-polynomial.Polynomial}
      */
 
   }, {
-    key: "bisection",
-    value: function bisection(min, max) {
-      var minValue = this.eval(min);
-      var maxValue = this.eval(max);
-      var result;
+    key: "removeZerosEquals",
+    value: function removeZerosEquals() {
+      var TOLERANCE = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1e-15;
+      var c = this.coefs;
+      var err = 10 * TOLERANCE * Math.abs(c.reduce(function (pv, cv) {
+        return Math.abs(cv) > Math.abs(pv) ? cv : pv;
+      }));
 
-      if (Math.abs(minValue) <= Polynomial.TOLERANCE) {
-        result = min;
-      } else if (Math.abs(maxValue) <= Polynomial.TOLERANCE) {
-        result = max;
-      } else if (minValue * maxValue <= 0) {
-        var tmp1 = Math.log(max - min);
-        var tmp2 = Math.LN10 * Polynomial.ACCURACY;
-        var iters = Math.ceil((tmp1 + tmp2) / Math.LN2);
-
-        for (var i = 0; i < iters; i++) {
-          result = 0.5 * (min + max);
-          var value = this.eval(result);
-
-          if (Math.abs(value) <= Polynomial.TOLERANCE) {
-            break;
-          }
-
-          if (value * minValue < 0) {
-            max = result;
-            maxValue = value;
-          } else {
-            min = result;
-            minValue = value;
-          }
+      for (var i = 0; i < c.length - 1; i++) {
+        if (Math.abs(c[i]) < err) {
+          c[i] = 0;
         }
       }
 
-      return result;
+      return this;
+    }
+    /**
+     *  Scales polynomial so that leading coefficient becomes 1.
+     *
+     *  @deprecated To be replaced by getMonic
+     *  @returns {module:kld-polynomial.Polynomial}
+     */
+
+  }, {
+    key: "monicEquals",
+    value: function monicEquals() {
+      var c = this.coefs;
+
+      if (c[c.length - 1] !== 1) {
+        this.divideEqualsScalar(c[c.length - 1]);
+      }
+
+      return this;
     }
     /**
      *  toString
@@ -364,6 +365,54 @@ function () {
       return result;
     }
     /**
+     *  bisection
+     *
+     *  @param {number} min
+     *  @param {number} max
+     *  @param {number} [TOLERANCE]
+     *  @param {number} [ACCURACY]
+     *  @returns {number}
+     */
+
+  }, {
+    key: "bisection",
+    value: function bisection(min, max) {
+      var TOLERANCE = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1e-6;
+      var ACCURACY = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 15;
+      var minValue = this.eval(min);
+      var maxValue = this.eval(max);
+      var result;
+
+      if (Math.abs(minValue) <= TOLERANCE) {
+        result = min;
+      } else if (Math.abs(maxValue) <= TOLERANCE) {
+        result = max;
+      } else if (minValue * maxValue <= 0) {
+        var tmp1 = Math.log(max - min);
+        var tmp2 = Math.LN10 * ACCURACY;
+        var maxIterations = Math.ceil((tmp1 + tmp2) / Math.LN2);
+
+        for (var i = 0; i < maxIterations; i++) {
+          result = 0.5 * (min + max);
+          var value = this.eval(result);
+
+          if (Math.abs(value) <= TOLERANCE) {
+            break;
+          }
+
+          if (value * minValue < 0) {
+            max = result;
+            maxValue = value;
+          } else {
+            min = result;
+            minValue = value;
+          }
+        }
+      }
+
+      return result;
+    }
+    /**
      *  Based on trapzd in "Numerical Recipes in C, 2nd Edition", page 137
      *
      *  @param {number} min
@@ -376,7 +425,7 @@ function () {
     key: "trapezoid",
     value: function trapezoid(min, max, n) {
       if (isNaN(min) || isNaN(max) || isNaN(n)) {
-        throw new Error("Polynomial.trapezoid: parameters must be numbers");
+        throw new TypeError("Parameters must be numbers");
       }
 
       var range = max - min;
@@ -400,7 +449,7 @@ function () {
       }
 
       if (isNaN(this._s)) {
-        throw new Error("Polynomial.trapezoid: this._s is NaN");
+        throw new TypeError("this._s is NaN");
       }
 
       return this._s;
@@ -417,7 +466,7 @@ function () {
     key: "simpson",
     value: function simpson(min, max) {
       if (isNaN(min) || isNaN(max)) {
-        throw new Error("Polynomial.simpson: parameters must be numbers");
+        throw new TypeError("Parameters must be numbers");
       }
 
       var range = max - min;
@@ -466,7 +515,7 @@ function () {
     key: "romberg",
     value: function romberg(min, max) {
       if (isNaN(min) || isNaN(max)) {
-        throw new Error("Polynomial.romberg: parameters must be numbers");
+        throw new TypeError("Parameters must be numbers");
       }
 
       var MAX = 20;
@@ -496,6 +545,260 @@ function () {
       }
 
       return result.y;
+    }
+    /**
+     *  Estimate what is the maximum polynomial evaluation error value under which polynomial evaluation could be in fact 0.
+     *
+     *  @param {number} maxAbsX
+     *  @returns {number}
+     */
+
+  }, {
+    key: "zeroErrorEstimate",
+    value: function zeroErrorEstimate(maxAbsX) {
+      var poly = this;
+      var ERRF = 1e-15;
+
+      if (typeof maxAbsX === "undefined") {
+        var rb = poly.bounds();
+        maxAbsX = Math.max(Math.abs(rb.minX), Math.abs(rb.maxX));
+      }
+
+      if (maxAbsX < 0.001) {
+        return 2 * Math.abs(poly.eval(ERRF));
+      }
+
+      var n = poly.coefs.length - 1;
+      var an = poly.coefs[n];
+      return 10 * ERRF * poly.coefs.reduce(function (m, v, i) {
+        var nm = v / an * Math.pow(maxAbsX, i);
+        return nm > m ? nm : m;
+      }, 0);
+    }
+    /**
+     *  Calculates upper Real roots bounds. <br/>
+     *  Real roots are in interval [negX, posX]. Determined by Fujiwara method.
+     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
+     *
+     *  @returns {{ negX: number, posX: number }}
+     */
+
+  }, {
+    key: "boundsUpperRealFujiwara",
+    value: function boundsUpperRealFujiwara() {
+      var a = this.coefs;
+      var n = a.length - 1;
+      var an = a[n];
+
+      if (an !== 1) {
+        a = this.coefs.map(function (v) {
+          return v / an;
+        });
+      }
+
+      var b = a.map(function (v, i) {
+        return i < n ? Math.pow(Math.abs(i === 0 ? v / 2 : v), 1 / (n - i)) : v;
+      });
+      var coefSelectionFunc;
+
+      var find2Max = function find2Max(acc, bi, i) {
+        if (coefSelectionFunc(i)) {
+          if (acc.max < bi) {
+            acc.nearmax = acc.max;
+            acc.max = bi;
+          } else if (acc.nearmax < bi) {
+            acc.nearmax = bi;
+          }
+        }
+
+        return acc;
+      };
+
+      coefSelectionFunc = function coefSelectionFunc(i) {
+        return i < n && a[i] < 0;
+      }; // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
+
+
+      var max_nearmax_pos = b.reduce(find2Max, {
+        max: 0,
+        nearmax: 0
+      });
+
+      coefSelectionFunc = function coefSelectionFunc(i) {
+        return i < n && (n % 2 === i % 2 ? a[i] < 0 : a[i] > 0);
+      }; // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
+
+
+      var max_nearmax_neg = b.reduce(find2Max, {
+        max: 0,
+        nearmax: 0
+      });
+      return {
+        negX: -2 * max_nearmax_neg.max,
+        posX: 2 * max_nearmax_pos.max
+      };
+    }
+    /**
+     *  Calculates lower Real roots bounds. <br/>
+     *  There are no Real roots in interval <negX, posX>. Determined by Fujiwara method.
+     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
+     *
+     *  @returns {{ negX: number, posX: number }}
+     */
+
+  }, {
+    key: "boundsLowerRealFujiwara",
+    value: function boundsLowerRealFujiwara() {
+      var poly = new Polynomial();
+      poly.coefs = this.coefs.slice().reverse();
+      var res = poly.boundsUpperRealFujiwara();
+      res.negX = 1 / res.negX;
+      res.posX = 1 / res.posX;
+      return res;
+    }
+    /**
+     *  Calculates left and right Real roots bounds. <br/>
+     *  Real roots are in interval [minX, maxX]. Combines Fujiwara lower and upper bounds to get minimal interval.
+     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
+     *
+     *  @returns {{ minX: number, maxX: number }}
+    */
+
+  }, {
+    key: "bounds",
+    value: function bounds() {
+      var urb = this.boundsUpperRealFujiwara();
+      var rb = {
+        minX: urb.negX,
+        maxX: urb.posX
+      };
+
+      if (urb.negX === 0 && urb.posX === 0) {
+        return rb;
+      }
+
+      if (urb.negX === 0) {
+        rb.minX = this.boundsLowerRealFujiwara().posX;
+      } else if (urb.posX === 0) {
+        rb.maxX = this.boundsLowerRealFujiwara().negX;
+      }
+
+      if (rb.minX > rb.maxX) {
+        rb.minX = rb.maxX = 0;
+      }
+
+      return rb; // TODO: if sure that there are no complex roots
+      // (maybe by using Sturm's theorem) use:
+      // return this.boundsRealLaguerre();
+    }
+    /**
+     *  Calculates absolute upper roots bound. <br/>
+     *  All (Complex and Real) roots magnitudes are &lt;= result. Determined by Rouche method.
+     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
+     *
+     *  @returns {number}
+     */
+
+  }, {
+    key: "boundUpperAbsRouche",
+    value: function boundUpperAbsRouche() {
+      var a = this.coefs;
+      var n = a.length - 1;
+      var max = a.reduce(function (prev, curr, i) {
+        if (i !== n) {
+          curr = Math.abs(curr);
+          return prev < curr ? curr : prev;
+        }
+
+        return prev;
+      }, 0);
+      return 1 + max / Math.abs(a[n]);
+    }
+    /**
+     *  Calculates absolute lower roots bound. <br/>
+     *  All (Complex and Real) roots magnitudes are &gt;= result. Determined by Rouche method.
+     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
+     *
+     *  @returns {number}
+     */
+
+  }, {
+    key: "boundLowerAbsRouche",
+    value: function boundLowerAbsRouche() {
+      var a = this.coefs;
+      var max = a.reduce(function (prev, curr, i) {
+        if (i !== 0) {
+          curr = Math.abs(curr);
+          return prev < curr ? curr : prev;
+        }
+
+        return prev;
+      }, 0);
+      return Math.abs(a[0]) / (Math.abs(a[0]) + max);
+    }
+    /**
+     *  Calculates left and right Real roots bounds.<br/>
+     *  WORKS ONLY if all polynomial roots are Real.
+     *  Real roots are in interval [minX, maxX]. Determined by Laguerre method.
+     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
+     *
+     *  @returns {{ minX: number, maxX: number }}
+     */
+
+  }, {
+    key: "boundsRealLaguerre",
+    value: function boundsRealLaguerre() {
+      var a = this.coefs;
+      var n = a.length - 1;
+      var p1 = -a[n - 1] / (n * a[n]);
+      var undersqrt = a[n - 1] * a[n - 1] - 2 * n / (n - 1) * a[n] * a[n - 2];
+      var p2 = (n - 1) / (n * a[n]) * Math.sqrt(undersqrt);
+
+      if (p2 < 0) {
+        p2 = -p2;
+      }
+
+      return {
+        minX: p1 - p2,
+        maxX: p1 + p2
+      };
+    }
+    /**
+     *  Root count by Descartes rule of signs. <br/>
+     *  Returns maximum number of positive and negative real roots and minimum number of complex roots.
+     *  @see {@link http://en.wikipedia.org/wiki/Descartes%27_rule_of_signs}
+     *
+     *  @returns {{maxRealPos: number, maxRealNeg: number, minComplex: number}}
+     */
+
+  }, {
+    key: "countRootsDescartes",
+    value: function countRootsDescartes() {
+      var a = this.coefs;
+      var n = a.length - 1;
+      var accum = a.reduce(function (acc, ai, i) {
+        if (acc.prev_a !== 0 && ai !== 0) {
+          if (acc.prev_a < 0 === ai > 0) {
+            acc.pos++;
+          }
+
+          if (i % 2 === 0 !== acc.prev_a < 0 === (i % 2 === 1 !== ai > 0)) {
+            acc.neg++;
+          }
+        }
+
+        acc.prev_a = ai;
+        return acc;
+      }, {
+        pos: 0,
+        neg: 0,
+        prev_a: 0
+      });
+      return {
+        maxRealPos: accum.pos,
+        maxRealNeg: accum.neg,
+        minComplex: n - (accum.pos + accum.neg)
+      };
     } // getters and setters
 
     /**
@@ -536,7 +839,7 @@ function () {
     key: "getRoots",
     value: function getRoots() {
       var result;
-      this.simplify();
+      this.simplifyEquals();
 
       switch (this.getDegree()) {
         case 0:
@@ -588,7 +891,7 @@ function () {
       }
 
       if (this.getDegree() === 0) {
-        throw new Error("Polynomial.getRootsInInterval: Unexpected empty polynomial");
+        throw new RangeError("Unexpected empty polynomial");
       } else if (this.getDegree() === 1) {
         push(this.bisection(min, max));
       } else {
@@ -656,7 +959,8 @@ function () {
         } else if (d === 0) {
           // really two roots with same value, but we only return one
           results.push(0.5 * -b);
-        }
+        } // else imaginary results
+
       }
 
       return results;
@@ -757,7 +1061,7 @@ function () {
       if (n === 4) {
         var poly = new Polynomial();
         poly.coefs = this.coefs.slice();
-        poly.divide_scalar(poly.coefs[n]);
+        poly.divideEqualsScalar(poly.coefs[n]);
         var ERRF = 1e-15;
 
         if (Math.abs(poly.coefs[0]) < 10 * ERRF * Math.abs(poly.coefs[3])) {
@@ -836,7 +1140,7 @@ function () {
 
         if (guesses.length > 0) {
           for (i = 0; i < guesses.length; i++) {
-            guesses[i] = Polynomial.newton_secant_bisection(guesses[i], f, df, 32, minmax[i][0], minmax[i][1]);
+            guesses[i] = Polynomial.newtonSecantBisection(guesses[i], f, df, 32, minmax[i][0], minmax[i][1]);
           }
         }
 
@@ -845,313 +1149,18 @@ function () {
 
       return results;
     }
-    /**
-     *  Estimate what is the maximum polynomial evaluation error value under which polynomial evaluation could be in fact 0.
-     *
-     *  @param {number} maxabsX
-     *  @returns {number}
-     */
-
-  }, {
-    key: "zeroErrorEstimate",
-    value: function zeroErrorEstimate(maxabsX) {
-      var poly = this;
-      var ERRF = 1e-15;
-
-      if (typeof maxabsX === "undefined") {
-        var rb = poly.bounds();
-        maxabsX = Math.max(Math.abs(rb.minX), Math.abs(rb.maxX));
-      }
-
-      if (maxabsX < 0.001) {
-        return 2 * Math.abs(poly.eval(ERRF));
-      }
-
-      var n = poly.coefs.length - 1;
-      var an = poly.coefs[n];
-      return 10 * ERRF * poly.coefs.reduce(function (m, v, i) {
-        var nm = v / an * Math.pow(maxabsX, i);
-        return nm > m ? nm : m;
-      }, 0);
-    }
-    /**
-     *  Calculates upper Real roots bounds. <br/>
-     *  Real roots are in interval [negX, posX]. Determined by Fujiwara method.
-     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
-     *
-     *  @returns {{ negX: number, posX: number }}
-     */
-
-  }, {
-    key: "bounds_UpperReal_Fujiwara",
-    value: function bounds_UpperReal_Fujiwara() {
-      var a = this.coefs;
-      var n = a.length - 1;
-      var an = a[n];
-
-      if (an !== 1) {
-        a = this.coefs.map(function (v) {
-          return v / an;
-        });
-      }
-
-      var b = a.map(function (v, i) {
-        return i < n ? Math.pow(Math.abs(i === 0 ? v / 2 : v), 1 / (n - i)) : v;
-      });
-      var coefSelectionFunc;
-
-      var find2Max = function find2Max(acc, bi, i) {
-        if (coefSelectionFunc(i)) {
-          if (acc.max < bi) {
-            acc.nearmax = acc.max;
-            acc.max = bi;
-          } else if (acc.nearmax < bi) {
-            acc.nearmax = bi;
-          }
-        }
-
-        return acc;
-      };
-
-      coefSelectionFunc = function coefSelectionFunc(i) {
-        return i < n && a[i] < 0;
-      }; // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
-
-
-      var max_nearmax_pos = b.reduce(find2Max, {
-        max: 0,
-        nearmax: 0
-      });
-
-      coefSelectionFunc = function coefSelectionFunc(i) {
-        return i < n && (n % 2 === i % 2 ? a[i] < 0 : a[i] > 0);
-      }; // eslint-disable-next-line unicorn/no-fn-reference-in-iterator
-
-
-      var max_nearmax_neg = b.reduce(find2Max, {
-        max: 0,
-        nearmax: 0
-      });
-      return {
-        negX: -2 * max_nearmax_neg.max,
-        posX: 2 * max_nearmax_pos.max
-      };
-    }
-    /**
-     *  Calculates lower Real roots bounds. <br/>
-     *  There are no Real roots in interval <negX, posX>. Determined by Fujiwara method.
-     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
-     *
-     *  @returns {{ negX: number, posX: number }}
-     */
-
-  }, {
-    key: "bounds_LowerReal_Fujiwara",
-    value: function bounds_LowerReal_Fujiwara() {
-      var poly = new Polynomial();
-      poly.coefs = this.coefs.slice().reverse();
-      var res = poly.bounds_UpperReal_Fujiwara();
-      res.negX = 1 / res.negX;
-      res.posX = 1 / res.posX;
-      return res;
-    }
-    /**
-     *  Calculates left and right Real roots bounds. <br/>
-     *  Real roots are in interval [minX, maxX]. Combines Fujiwara lower and upper bounds to get minimal interval.
-     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
-     *
-     *  @returns {{ minX: number, maxX: number }}
-    */
-
-  }, {
-    key: "bounds",
-    value: function bounds() {
-      var urb = this.bounds_UpperReal_Fujiwara();
-      var rb = {
-        minX: urb.negX,
-        maxX: urb.posX
-      };
-
-      if (urb.negX === 0 && urb.posX === 0) {
-        return rb;
-      }
-
-      if (urb.negX === 0) {
-        rb.minX = this.bounds_LowerReal_Fujiwara().posX;
-      } else if (urb.posX === 0) {
-        rb.maxX = this.bounds_LowerReal_Fujiwara().negX;
-      }
-
-      if (rb.minX > rb.maxX) {
-        rb.minX = rb.maxX = 0;
-      }
-
-      return rb; // TODO: if sure that there are no complex roots
-      // (maybe by using Sturm's theorem) use:
-      // return this.bounds_Real_Laguerre();
-    }
-    /**
-     *  Sets small coefficients to zero.
-     *
-     *  @returns {module:kld-polynomial.Polynomial}
-     */
-
-  }, {
-    key: "modify_zeroSmallCoefs",
-    value: function modify_zeroSmallCoefs() {
-      var c = this.coefs;
-      var ERRF = 1e-15;
-      var err = 10 * ERRF * Math.abs(c.reduce(function (pv, cv) {
-        return Math.abs(cv) > Math.abs(pv) ? cv : pv;
-      }));
-
-      for (var i = 0; i < c.length - 1; i++) {
-        if (Math.abs(c[i]) < err) {
-          c[i] = 0;
-        }
-      }
-
-      return this;
-    }
-    /**
-     *  Scales polynomial so that leading coefficient becomes 1.
-     *
-     *  @returns {module:kld-polynomial.Polynomial}
-     */
-
-  }, {
-    key: "modify_toMonic",
-    value: function modify_toMonic() {
-      var c = this.coefs;
-
-      if (c[c.length - 1] !== 1) {
-        this.divide_scalar(c[c.length - 1]);
-      }
-
-      return this;
-    }
-    /**
-     *  Calculates absolute upper roots bound. <br/>
-     *  All (Complex and Real) roots magnitudes are &lt;= result. Determined by Rouche method.
-     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
-     *
-     *  @returns {number}
-     */
-
-  }, {
-    key: "bound_UpperAbs_Rouche",
-    value: function bound_UpperAbs_Rouche() {
-      var a = this.coefs;
-      var n = a.length - 1;
-      var max = a.reduce(function (prev, curr, i) {
-        if (i !== n) {
-          curr = Math.abs(curr);
-          return prev < curr ? curr : prev;
-        }
-
-        return prev;
-      }, 0);
-      return 1 + max / Math.abs(a[n]);
-    }
-    /**
-     *  Calculates absolute lower roots bound. <br/>
-     *  All (Complex and Real) roots magnitudes are &gt;= result. Determined by Rouche method.
-     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
-     *
-     *  @returns {number}
-     */
-
-  }, {
-    key: "bound_LowerAbs_Rouche",
-    value: function bound_LowerAbs_Rouche() {
-      var a = this.coefs;
-      var max = a.reduce(function (prev, curr, i) {
-        if (i !== 0) {
-          curr = Math.abs(curr);
-          return prev < curr ? curr : prev;
-        }
-
-        return prev;
-      }, 0);
-      return Math.abs(a[0]) / (Math.abs(a[0]) + max);
-    }
-    /**
-     *  Calculates left and right Real roots bounds.<br/>
-     *  WORKS ONLY if all polynomial roots are Real.
-     *  Real roots are in interval [minX, maxX]. Determined by Laguerre method.
-     *  @see {@link http://en.wikipedia.org/wiki/Properties_of_polynomial_roots}
-     *
-     *  @returns {{ minX: number, maxX: number }}
-     */
-
-  }, {
-    key: "bounds_Real_Laguerre",
-    value: function bounds_Real_Laguerre() {
-      var a = this.coefs;
-      var n = a.length - 1;
-      var p1 = -a[n - 1] / (n * a[n]);
-      var undersqrt = a[n - 1] * a[n - 1] - 2 * n / (n - 1) * a[n] * a[n - 2];
-      var p2 = (n - 1) / (n * a[n]) * Math.sqrt(undersqrt);
-
-      if (p2 < 0) {
-        p2 = -p2;
-      }
-
-      return {
-        minX: p1 - p2,
-        maxX: p1 + p2
-      };
-    }
-    /**
-     *  Root count by Descartes rule of signs. <br/>
-     *  Returns maximum number of positive and negative real roots and minimum number of complex roots.
-     *  @see {@link http://en.wikipedia.org/wiki/Descartes%27_rule_of_signs}
-     *
-     *  @returns {{maxRealPos: number, maxRealNeg: number, minComplex: number}}
-     */
-
-  }, {
-    key: "countRoots_Descartes",
-    value: function countRoots_Descartes() {
-      var a = this.coefs;
-      var n = a.length - 1;
-      var accum = a.reduce(function (acc, ai, i) {
-        if (acc.prev_a !== 0 && ai !== 0) {
-          if (acc.prev_a < 0 === ai > 0) {
-            acc.pos++;
-          }
-
-          if (i % 2 === 0 !== acc.prev_a < 0 === (i % 2 === 1 !== ai > 0)) {
-            acc.neg++;
-          }
-        }
-
-        acc.prev_a = ai;
-        return acc;
-      }, {
-        pos: 0,
-        neg: 0,
-        prev_a: 0
-      });
-      return {
-        maxRealPos: accum.pos,
-        maxRealNeg: accum.neg,
-        minComplex: n - (accum.pos + accum.neg)
-      };
-    }
   }], [{
     key: "interpolate",
     value: function interpolate(xs, ys, n, offset, x) {
       if (xs.constructor !== Array || ys.constructor !== Array) {
-        throw new Error("Polynomial.interpolate: xs and ys must be arrays");
+        throw new TypeError("xs and ys must be arrays");
       }
 
       if (isNaN(n) || isNaN(offset) || isNaN(x)) {
-        throw new Error("Polynomial.interpolate: n, offset, and x must be numbers");
+        throw new TypeError("n, offset, and x must be numbers");
       }
 
-      var i;
-      var y = 0;
+      var i, y;
       var dy = 0;
       var c = new Array(n);
       var d = new Array(n);
@@ -1180,7 +1189,7 @@ function () {
           var den = ho - hp;
 
           if (den === 0.0) {
-            throw new Error("Unable to interpolate polynomial. Two numbers in n were identical (to within roundoff)");
+            throw new RangeError("Unable to interpolate polynomial. Two numbers in n were identical (to within roundoff)");
           }
 
           den = w / den;
@@ -1205,7 +1214,7 @@ function () {
      *  @see {@link http://en.wikipedia.org/wiki/Secant_method}
      *  @see {@link http://en.wikipedia.org/wiki/Bisection_method}
      *
-     *  @param {number} x0 - Inital root guess
+     *  @param {number} x0 - Initial root guess
      *  @param {Function} f - Function which root we are trying to find
      *  @param {Function} df - Derivative of function f
      *  @param {number} max_iterations - Maximum number of algorithm iterations
@@ -1215,8 +1224,8 @@ function () {
      */
 
   }, {
-    key: "newton_secant_bisection",
-    value: function newton_secant_bisection(x0, f, df, max_iterations, min, max) {
+    key: "newtonSecantBisection",
+    value: function newtonSecantBisection(x0, f, df, max_iterations, min, max) {
       var x,
           prev_dfx = 0,
           dfx,
@@ -1231,14 +1240,14 @@ function () {
 
       if (isBounded) {
         if (min > max) {
-          throw new Error("newton root finding: min must be greater than max");
+          throw new RangeError("Min must be greater than max");
         }
 
         y_atmin = f(min);
         y_atmax = f(max);
 
         if (sign(y_atmin) === sign(y_atmax)) {
-          throw new Error("newton root finding: y values of bounds must be of opposite sign");
+          throw new RangeError("Y values of bounds must be of opposite sign");
         }
       }
 
@@ -1253,7 +1262,7 @@ function () {
         if (dfx === 0) {
           if (prev_dfx === 0) {
             // error
-            throw new Error("newton root finding: df(x) is zero");
+            throw new RangeError("df(x) is zero");
           } else {
             // use previous derivation value
             dfx = prev_dfx;
@@ -1321,9 +1330,6 @@ function () {
   return Polynomial;
 }();
 
-Polynomial.TOLERANCE = 1e-6;
-Polynomial.ACCURACY = 15;
-
 /**
  *  SqrtPolynomial
  *
@@ -1363,7 +1369,7 @@ function (_Polynomial) {
       }
 
       if (result < 0) {
-        throw new Error("SqrtPolynomial.eval: cannot take square root of negative number");
+        throw new RangeError("Cannot take square root of negative number");
       }
 
       return Math.sqrt(result);
