@@ -12,11 +12,6 @@ module.exports = {
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
-    "settings": {
-        "polyfills": [
-            "Error"
-        ]
-    },
     "overrides": [
         {
             files: "docs/jsdoc-config.js",
@@ -71,7 +66,6 @@ module.exports = {
             "error",
             "as-needed"
         ],
-        "no-multiple-empty-lines": "off",
         "max-len": "off",
         "node/exports-style": "off",
         "unicorn/no-zero-fractions": "off",
